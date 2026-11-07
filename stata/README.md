@@ -4,6 +4,12 @@ A Stata command that downloads a version of Toronto Election Results, checks eve
 Stata's own `checksum` command, keeps it in a cache, and loads one table at a time. It needs
 Stata 16 or later and nothing else.
 
+**It has never been run in Stata.** The first release does not depend on it: Stata users open the
+`.dta` files in the package directly, as the package README shows, and can check each file with
+Stata's `checksum` against `checksums.csv`. The command installs from GitHub and goes to SSC only
+after someone with Stata runs its tests (below). Until then it prints a note saying so the first
+time it is used in a session.
+
 ```stata
 net install torontoelections, from("https://raw.githubusercontent.com/alexwolson/toronto-election-records/main/stata")
 torontoelections versions

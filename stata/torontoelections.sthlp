@@ -25,6 +25,15 @@ where {it:table} is one of {cmd:candidacies}, {cmd:contests}, {cmd:elections}, {
 {cmd:person_id_redirects}, {cmd:office_tenures}, {cmd:parties} or {cmd:districts}.
 
 
+{title:Status}
+
+{pstd}
+This command has not yet been run in Stata. It is installed from GitHub, not from SSC, until
+someone with Stata runs its tests. The .dta files in every version of the dataset do not depend on
+it: unzip the package and {cmd:use "data/candidacies.dta"}. Please report problems at
+{browse "https://github.com/alexwolson/toronto-election-records/issues"}.
+
+
 {title:Description}
 
 {pstd}

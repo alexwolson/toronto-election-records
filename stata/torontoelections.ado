@@ -10,6 +10,11 @@
 
 program define torontoelections
 	version 16
+	if `"$TORONTOELECTIONS_NOTED"' == "" {
+		display as text "note: torontoelections has not yet been tested in Stata; please report" ///
+			" problems at https://github.com/alexwolson/toronto-election-records/issues"
+		global TORONTOELECTIONS_NOTED 1
+	}
 	gettoken subcommand 0 : 0, parse(" ,")
 	if `"`subcommand'"' == "versions" {
 		_te_versions `0'
