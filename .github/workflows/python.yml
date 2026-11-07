@@ -1,0 +1,25 @@
+name: python-loader
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.13"]
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+      - name: Lint
+        run: |
+          uv run --python ${{ matrix.python }} ruff check
+          uv run --python ${{ matrix.python }} ruff format --check
+      - name: Test against the fixture package
+        run: uv run --python ${{ matrix.python }} pytest
