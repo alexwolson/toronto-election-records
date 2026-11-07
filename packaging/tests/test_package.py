@@ -180,3 +180,16 @@ def test_audited_links_must_be_the_links_in_the_build():
     }
     assert check_audited_links(manifest, "a" * 64) == []
     assert check_audited_links(manifest, "b" * 64)
+
+
+def test_a_release_name_with_a_dot_keeps_both_zip_names(tmp_path):
+    from te_package.assemble import _zip
+
+    for name in (
+        "toronto-election-records-results-2026-11-30.1",
+        "toronto-election-records-results-2026-11-30.1-provenance",
+    ):
+        folder = tmp_path / name
+        folder.mkdir()
+        (folder / "x.txt").write_text("x", encoding="utf-8")
+        assert _zip(folder).name == f"{name}.zip"
