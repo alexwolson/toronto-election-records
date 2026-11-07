@@ -31,8 +31,8 @@ with its type.
 
 ## Quick start
 
-The loaders download a version, check every file against its checksum and keep a copy for later
-sessions.
+In R and Python, the loaders download a version, check every file against its checksum and keep a
+copy for later sessions.
 
 ```r
 # R
@@ -46,12 +46,6 @@ import torontoelections as te
 candidacies = te.candidacies(version="${version}")
 ```
 
-```stata
-* Stata 16 or later
-ssc install torontoelections
-torontoelections use candidacies, version(${version}) clear
-```
-
 The files in this package can also be read directly:
 
 ```r
@@ -63,8 +57,19 @@ import pandas as pd
 candidacies = pd.read_parquet("data/candidacies.parquet")
 ```
 
+In Stata (14 or later), unzip the package and open a table's `.dta` file from the package's
+folder. Its variables carry the codebook's labels, and booleans are 0 and 1 with the value labels
+`false` and `true`.
+
 ```stata
 use "data/candidacies.dta", clear
+```
+
+To check a file, run Stata's `checksum` on it and compare the checksum and size it prints with the
+`cksum` and `bytes` columns of the file's row in `checksums.csv`. They are the same POSIX CRC.
+
+```stata
+checksum "data/candidacies.dta"
 ```
 
 ## Before you analyse
