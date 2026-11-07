@@ -28,21 +28,10 @@ from te_package.assemble import build_package
 from te_package.build_input import BuildPin, sha256
 from te_package.checks import posix_cksum
 from te_package.codebook import REPO_ROOT, load_codebook
+from te_package.publish import REGISTRY_COLUMNS
 
 SAMPLE = Path(__file__).parent / "build"
 OUT = REPO_ROOT / "fixtures"
-REGISTRY_COLUMNS = [
-    "version",
-    "published",
-    "doi",
-    "record_url",
-    "build_commit",
-    "schema_version",
-    "package_url",
-    "package_bytes",
-    "package_sha256",
-    "package_cksum",
-]
 
 
 def _git(repo: Path, *args: str) -> str:
