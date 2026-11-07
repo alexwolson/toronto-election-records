@@ -212,3 +212,16 @@ def test_checksums_csv_lists_every_file_with_its_size_sha256_and_cksum(built):
         assert row.bytes == path.stat().st_size
         assert row.sha256 == hashlib.sha256(path.read_bytes()).hexdigest()
         assert row.cksum == posix_cksum(path)[0]
+
+
+def test_a_release_name_with_a_dot_keeps_both_zip_names(tmp_path):
+    from te_package.assemble import _zip
+
+    for name in (
+        "toronto-election-records-results-2026-11-30.1",
+        "toronto-election-records-results-2026-11-30.1-provenance",
+    ):
+        folder = tmp_path / name
+        folder.mkdir()
+        (folder / "x.txt").write_text("x", encoding="utf-8")
+        assert _zip(folder).name == f"{name}.zip"

@@ -128,7 +128,8 @@ def _fresh_dir(path: Path, parent: Path) -> Path:
 
 
 def _zip(folder: Path) -> Path:
-    target = folder.with_suffix(".zip")
+    # Not with_suffix: a release name such as results-2026-11-30.1 already holds a dot.
+    target = folder.parent / f"{folder.name}.zip"
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(p for p in folder.rglob("*") if p.is_file()):
             archive.write(path, f"{folder.name}/{path.relative_to(folder)}")
