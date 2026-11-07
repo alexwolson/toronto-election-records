@@ -6,7 +6,7 @@
 
 [build]
 repository = "https://github.com/alexwolson/toronto-election-results"
-commit = "e090bf76d992f96550ad19b99b53011a0911b791"
+commit = "d5c133053ce2e006ccab0102a612dcc66a3aecf7"
 tag = ""
 
 [validation]

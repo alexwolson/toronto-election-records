@@ -502,11 +502,13 @@ tables:
         description: >-
           True when the incumbent ran for a seat other than the one held. Within one boundary
           set that means another district. Across a boundary change it is false only when the
-          district contested holds more of the held district's polls than any other district
-          does. A Mayor never changes district. A seat in a legislature outside the City counts
-          as a change.
+          district contested holds more of the held district's people than any other district
+          does: council wards count people by the City's polls, and ridings by census
+          population. A Mayor never changes district. A seat in a legislature outside the City
+          counts as a change.
         null_when: >-
-          Null when the candidate is not an incumbent, or the boundaries cannot be compared.
+          Null when the candidate is not an incumbent, or the boundaries cannot be compared: the
+          1997 federal, 1999 Ontario, 2004 federal and 2007 Ontario elections.
       - name: predecessor_incumbent
         type: boolean
         label: Sat on a predecessor council before amalgamation

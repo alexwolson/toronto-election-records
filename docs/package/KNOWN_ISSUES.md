@@ -31,9 +31,12 @@ None reported for this version.
   sitting trustees who ran.
 - The sitting members at the 1995 Ontario election are known only from Elections Ontario's
   incumbent flag. Their tenures have no start date and their `incumbent_appointed` is null.
-- `incumbent_changed_district` is set across a boundary change only for the 2018 council
-  election, by comparing the polls of the old and new wards. For other boundary changes it is
-  null.
+- `incumbent_changed_district` is set across a boundary change for the 2018 council election,
+  by the polls of the old and new wards, and for the 2015 and 2025 federal and 2018 Ontario
+  elections, by census population: the new riding holding most of the held riding's people
+  takes over its seat. It is null for the 2004 federal and 2007 Ontario elections, which need the
+  2001 Census, and for the 1997 federal and 1999 Ontario elections, whose 1987 boundaries have no
+  shapes. Some splits are close: Don Valley East's 2011 population divided 51.5% and 48.5%.
 
 ## Results
 
