@@ -1,0 +1,16 @@
+# The build of toronto-election-results this repository packages.
+#
+# A release names the build's tag and the commit it points at; the packager checks that the tag
+# points at the commit. With no tag, the package is a development build named dev-<commit>,
+# which the publish step refuses.
+
+[build]
+repository = "https://github.com/alexwolson/toronto-election-results"
+commit = "e090bf76d992f96550ad19b99b53011a0911b791"
+tag = ""
+
+[validation]
+# SHA-256 of data/out/candidacy_person_links.csv as the link audit covered it
+# (docs/verification/link-audit-2026-11-07.md in the build). The package build checks that the
+# pinned build's links file is this file, so the audit's figures apply to it.
+audited_links_sha256 = "40c10c0a61cc9fd6a4a571485467e098c27041b41c7dff04fa0a7d01ca45b459"

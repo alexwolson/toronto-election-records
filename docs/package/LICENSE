@@ -1,0 +1,9 @@
+Toronto Election Results, version ${version}
+
+The data and documentation in this package are licensed under the Creative Commons Attribution 4.0
+International Licence (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/legalcode
+
+You may share and adapt them for any purpose if you give appropriate credit, provide a link to the
+licence and indicate whether changes were made. CITATION.cff gives the citation to use.
+
+${attributions}

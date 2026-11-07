@@ -1,0 +1,112 @@
+{
+  "artifacts": [
+    {
+      "bytes": 53090,
+      "local_path": "data/out/election_results.parquet",
+      "rows": 97,
+      "sha256": "b2c2f81e5f9dbc613fef589da25ea91a5abd3004def015782917e8c3f53848fb"
+    },
+    {
+      "bytes": 18425,
+      "local_path": "data/out/contests.parquet",
+      "rows": 15,
+      "sha256": "726d9a2f94703b418840bd4f982e0898dc3c90d3142d58bc3ee793a13a9f6dfb"
+    },
+    {
+      "bytes": 4043,
+      "local_path": "data/out/election_events.parquet",
+      "rows": 10,
+      "sha256": "ee3c2badaaf505c92934ce7ef44b44f72793331de44f9b40a69f3069f973e543"
+    },
+    {
+      "bytes": 8710,
+      "local_path": "data/out/people.parquet",
+      "rows": 95,
+      "sha256": "0ca74b43764068cb38873b79ea7cb03ca9bcec34baf0a191dbd5fc6134626730"
+    },
+    {
+      "bytes": 33509,
+      "local_path": "data/out/candidacy_person_links.parquet",
+      "rows": 97,
+      "sha256": "216de63ba0cf9f3e96bbbd2a1a23094ab7c9c9720bb125d73d07010fb3638108"
+    },
+    {
+      "bytes": 76014,
+      "local_path": "data/out/candidacy_person_links.csv",
+      "rows": 97,
+      "sha256": "468045bc8bf610ff1d4f813cfdac6b0dabe1902102b13be0e43370bf57b59ce4"
+    },
+    {
+      "bytes": 5818,
+      "local_path": "data/out/person_external_ids.parquet",
+      "rows": 21,
+      "sha256": "beccf9e94d50e8cfa4105497a7b7e5a400f55dffef61d787cd89075fda3447c9"
+    },
+    {
+      "bytes": 4635,
+      "local_path": "data/out/person_external_ids.csv",
+      "rows": 21,
+      "sha256": "bd1e4facbda466ccf6d3fff86fcbe7b8995aaae6c438ded7f306e06bcfd243d0"
+    },
+    {
+      "bytes": 20631,
+      "local_path": "data/out/office_tenures.parquet",
+      "rows": 50,
+      "sha256": "452c984e3bc8f2dc6372ba753f1ee5878f2b7070e18d4778b04197473192f24c"
+    },
+    {
+      "bytes": 4824,
+      "local_path": "data/out/parties.parquet",
+      "rows": 25,
+      "sha256": "5b379e53d41c073d3ce95eccbd8a8a101c5cbba29f8fd8a3380cae8430107d1f"
+    },
+    {
+      "bytes": 234418,
+      "local_path": "data/out/electoral_districts.parquet",
+      "rows": 34,
+      "sha256": "837254a85fa016411c47ef5514bbb7149df1abf50764b14d898d736631b1e321"
+    },
+    {
+      "bytes": 7394,
+      "local_path": "data/out/endorsers.parquet",
+      "rows": 2,
+      "sha256": "05f1eae2dfde95612ab6a41bcc3fb91bf37694d786210f3d53e715c394373901"
+    },
+    {
+      "bytes": 10970,
+      "local_path": "data/out/endorsement_assertions.parquet",
+      "rows": 2,
+      "sha256": "bc2d81b8378eb0e2a82301dab6cb76f37334f07bbc45d83a80bbc960160fa93e"
+    },
+    {
+      "bytes": 3566,
+      "local_path": "data/out/endorsements.parquet",
+      "rows": 2,
+      "sha256": "221e5e98600dddf66ae4ef81a9e044341fe79da1a5e6ae124f4eb4b4a2d718c4"
+    },
+    {
+      "bytes": 4273,
+      "local_path": "data/out/endorsement_coverage.parquet",
+      "rows": 2,
+      "sha256": "f7b2b863876dc62e348ab5921328b93e4280c168dbed188c7d08c249d58b9b01"
+    }
+  ],
+  "generated_at": "2026-11-07T18:49:37.299080Z",
+  "schema_version": "2.2.0",
+  "sources": [
+    {
+      "bytes": 62113718,
+      "local_path": "data/raw/boundaries/federal-1996/gfed000b01m_e.zip",
+      "retrieved_at": "2026-11-07T18:41:12.813694Z",
+      "sha256": "0526ced43cd62915ab009d34374903ec0dffa3861fa7d61d7d4e0750049c9fb9",
+      "source_url": "https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-2001-eng.cfm"
+    },
+    {
+      "bytes": 4107866,
+      "local_path": "data/raw/boundaries/federal-2003/federal_electoral_districts_boundaries_2003_en.gdb.zip",
+      "retrieved_at": "2026-11-07T17:43:12.181769Z",
+      "sha256": "3a26c6ac6382f65f5be5743d09c5d0051898f16f969f7c8a10eaa4fd0b6842d3",
+      "source_url": "https://ftp.maps.canada.ca/pub/elections_elections/Electoral-districts_Circonscription-electorale/federal_electoral_districts_boundaries_2003/federal_electoral_districts_boundaries_2003_en.gdb.zip"
+    }
+  ]
+}

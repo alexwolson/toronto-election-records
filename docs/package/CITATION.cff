@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it as below."
+title: "Toronto Election Results"
+abstract: >-
+  Candidates and results of the municipal, school board trustee, federal and provincial elections
+  held within the City of Toronto, from the last general elections before amalgamation (1993
+  federal, 1994 municipal, 1995 Ontario) through the 2026 municipal general election, with one row
+  per candidacy and evidence-backed links that join each person's runs for office.
+type: dataset
+authors:
+  - given-names: Alex
+    family-names: Olson
+    affiliation: University of Toronto
+    orcid: "https://orcid.org/0000-0002-6593-2779"
+  - given-names: Matt
+    family-names: Elliott
+version: "${version}"
+date-released: ${build_date}
+${doi_cff}repository-code: "https://github.com/alexwolson/toronto-election-results"
+url: "https://github.com/alexwolson/toronto-election-records"
+license: CC-BY-4.0
+keywords:
+  - Toronto
+  - elections
+  - municipal elections
+  - school board trustees
+  - Canadian federal elections
+  - Ontario elections
+  - election results
