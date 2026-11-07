@@ -247,3 +247,16 @@ def test_stata_files_read_back_with_readstat(built):
             else:
                 got = [None if pd.isna(v) else float(v) for v in got]
             assert got == reference[name], (table.name, name)
+
+
+def test_a_release_name_with_a_dot_keeps_both_zip_names(tmp_path):
+    from te_package.assemble import _zip
+
+    for name in (
+        "toronto-election-records-results-2026-11-30.1",
+        "toronto-election-records-results-2026-11-30.1-provenance",
+    ):
+        folder = tmp_path / name
+        folder.mkdir()
+        (folder / "x.txt").write_text("x", encoding="utf-8")
+        assert _zip(folder).name == f"{name}.zip"
