@@ -1,0 +1,3 @@
+v 3
+d Stata loader for Toronto Election Results
+p torontoelections Download, verify and load the Toronto Election Results dataset

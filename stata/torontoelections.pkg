@@ -1,0 +1,8 @@
+v 3
+d torontoelections: download, verify and load the Toronto Election Results dataset
+d Candidates and results of the municipal, school board trustee, federal and provincial
+d elections held within the City of Toronto since 1993, with each person's runs joined.
+d Requires Stata 16 or later.
+d Distribution-Date: 20261107
+f torontoelections.ado
+f torontoelections.sthlp
