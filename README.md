@@ -30,6 +30,7 @@ a development package named `dev-<commit>`, which cannot be published.
 | `docs/package/` | The templates of the package's documents. Figures in them are filled from the data when the package is made. |
 | `packaging/` | The Python project that makes and checks the package (`te-package`). |
 | `python/` | The Python loader, `toronto-elections` on PyPI, imported as `torontoelections`. |
+| `r/` | The R loader, `torontoelections` on CRAN. Before submitting it, add the maintainer's email to `Authors@R` in `r/DESCRIPTION`; `R CMD check --as-cran` then reports only that it is a new submission. |
 | `versions.csv` | The registry of published versions that the loaders read: version, date, DOI, build commit, package schema, and the package ZIP's URL, size, SHA-256 and POSIX `cksum`. The publish step adds a row. |
 | `fixtures/` | One package built from the sample build, with a registry that lists it. The loaders' tests read it with no network; `packaging/tests/fixtures/make_loader_fixture.py` rebuilds it. |
 

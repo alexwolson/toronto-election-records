@@ -1,0 +1,88 @@
+---
+title: "A worked guide to torontoelections"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A worked guide to torontoelections}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# The guide downloads data from Zenodo, so its code is shown and not run when the package is built.
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+This guide loads one version of Toronto Election Results and walks through six uses of it.
+Replace the version with the one you cite; `te_versions()` lists them.
+
+```{r}
+library(torontoelections)
+version <- "results-2026-11-30.1"
+```
+
+## 1. Load the candidacies of a pinned version
+
+```{r}
+candidacies <- te_candidacies(version = version)
+dim(candidacies)
+attr(candidacies$incumbent, "description")
+```
+
+Each row is one candidate in one Contest. Counts are integers, flags logical and dates `Date`.
+A missing value means what the codebook says it means; `te_codebook("candidacies", version)`
+lists every column.
+
+## 2. Incumbents' win rates by office
+
+```{r}
+incumbents <- candidacies[candidacies$incumbent %in% TRUE & !is.na(candidacies$elected), ]
+tapply(incumbents$elected, incumbents$office_type, mean)
+```
+
+`incumbent` is `NA` where the release holds no roster that settles it, so keep the rows where it
+is `TRUE` rather than treating `NA` as `FALSE`.
+
+## 3. One person's career across levels of government
+
+```{r}
+people <- te_people(version = version)
+person <- people$person_id[people$preferred_name == "Olivia Chow"]
+career <- te_careers(person, version = version)
+career[, c("election_date", "office_type", "district_name", "party_name", "votes", "elected")]
+```
+
+`te_careers()` accepts a retired Person ID too, and follows it to the Person that replaced it.
+
+## 4. Join People to Wikidata and ParlInfo
+
+```{r}
+members <- people[!is.na(people$wikidata_id), ]
+head(members[, c("person_id", "preferred_name", "wikidata_id", "parlinfo_id")])
+```
+
+Only People who sat in the House of Commons or the Legislative Assembly of Ontario have these IDs.
+
+## 5. Check that a result does not rest on structural links
+
+```{r}
+confirmed <- te_candidacies(version = version, source_confirmed_only = TRUE)
+repeat_runners <- function(frame) sum(table(frame$person_id) > 1)
+c(all_links = repeat_runners(candidacies), source_confirmed = repeat_runners(confirmed))
+```
+
+With `source_confirmed_only = TRUE`, a Candidacy whose link rests only on the build's structural
+rules has no Person. Repeating an analysis this way shows how much it depends on those links.
+
+## 6. Map the 2022 council results
+
+```{r}
+shapes <- te_districts(version = version, geometry = TRUE)  # needs sf
+winners <- candidacies[candidacies$office_type == "councillor" &
+                         candidacies$election_year == 2022 &
+                         candidacies$elected %in% TRUE, c("district_id", "vote_share")]
+winners_map <- merge(shapes, winners, by = "district_id")
+plot(winners_map["vote_share"])
+```
+
+Districts in different boundary sets cover different areas, so map one election, or one boundary
+set, at a time.

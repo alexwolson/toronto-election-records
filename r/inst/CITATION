@@ -1,0 +1,18 @@
+bibentry(
+  bibtype = "Misc",
+  title = "Toronto Election Results",
+  author = c(person("Alex", "Olson"), person("Matt", "Elliott")),
+  year = "2026",
+  publisher = "Zenodo",
+  note = "Cite the version you use: te_cite(version) gives its citation and DOI.",
+  textVersion = "Olson, A., & Elliott, M. (2026). Toronto Election Results [Data set]. Zenodo. Cite the version you use: te_cite(version) gives its citation and DOI."
+)
+
+bibentry(
+  bibtype = "Manual",
+  title = "torontoelections: Download, Verify and Load the Toronto Election Results Dataset",
+  author = person("Alex", "Olson"),
+  year = "2026",
+  note = "R package version 0.1.0",
+  url = "https://github.com/alexwolson/toronto-election-records"
+)
