@@ -37,6 +37,57 @@ CONTACT_PATTERNS = {
 }
 
 
+def _cksum_table() -> list[int]:
+    table = []
+    for i in range(256):
+        crc = i << 24
+        for _ in range(8):
+            crc = (crc << 1) ^ 0x04C11DB7 if crc & 0x80000000 else crc << 1
+        table.append(crc & 0xFFFFFFFF)
+    return table
+
+
+_CKSUM_TABLE = _cksum_table()
+
+
+def posix_cksum(path: Path) -> tuple[int, int]:
+    """The POSIX 1003.2 CRC of a file and its length, as `cksum` and Stata's `checksum` give."""
+
+    crc, length, table = 0, 0, _CKSUM_TABLE
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            length += len(block)
+            for byte in block:
+                crc = ((crc << 8) & 0xFFFFFFFF) ^ table[(crc >> 24) ^ byte]
+    remaining = length
+    while remaining:
+        crc = ((crc << 8) & 0xFFFFFFFF) ^ table[(crc >> 24) ^ (remaining & 0xFF)]
+        remaining >>= 8
+    return (~crc) & 0xFFFFFFFF, length
+
+
+def checksum_rows(package_dir: Path) -> list[dict]:
+    """One row per file in the package but checksums.csv itself, in path order."""
+
+    rows = []
+    for path in sorted(p for p in package_dir.rglob("*") if p.is_file()):
+        relative = str(path.relative_to(package_dir))
+        if relative == "checksums.csv":
+            continue
+        crc, length = posix_cksum(path)
+        rows.append({"path": relative, "bytes": length, "sha256": _sha256(path), "cksum": crc})
+    return rows
+
+
+def check_checksums_csv(package_dir: Path) -> list[str]:
+    """checksums.csv lists every file of the package with its size, SHA-256 and POSIX cksum."""
+
+    listed = pd.read_csv(package_dir / "checksums.csv", dtype={"path": str}).to_dict("records")
+    if listed != checksum_rows(package_dir):
+        return ["checksums.csv does not match the files in the package"]
+    return []
+
+
 class CheckError(Exception):
     def __init__(self, problems: list[str]):
         super().__init__("the package failed its checks:\n- " + "\n- ".join(problems))
@@ -297,6 +348,7 @@ def run_checks(
     problems += check_repeated_labels(tables)
     problems += check_datapackage(package_dir, codebook)
     problems += check_formats_agree(package_dir, codebook)
+    problems += check_checksums_csv(package_dir)
     texts = [p for p in package_dir.rglob("*") if p.suffix in {".csv", ".md", ".json", ".cff"}]
     problems += check_no_contact_details(texts)
     if audited_links_sha256:

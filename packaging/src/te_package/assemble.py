@@ -10,11 +10,12 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
+import pandas as pd
 import pyarrow as pa
 import pyarrow.csv as pacsv
 
 from te_package.build_input import BuildPin, fetch_build, sha256, verify_outputs
-from te_package.checks import run_checks
+from te_package.checks import checksum_rows, run_checks
 from te_package.codebook import Codebook, load_codebook, render_markdown, table_schema
 from te_package.documents import render, template_values
 from te_package.tables import UserTables, make_tables, read_build
@@ -191,6 +192,8 @@ def build_package(
         (package / name).write_text(render(name, values), encoding="utf-8")
     (package / "CITATION.cff").write_text(render("CITATION.cff", values), encoding="utf-8")
     (package / "LICENSE").write_text(render("LICENSE", values), encoding="utf-8")
+    # Written last, so it lists every other file; Stata's loader checks files with `cksum`.
+    pd.DataFrame(checksum_rows(package)).to_csv(package / "checksums.csv", index=False)
     run_checks(package, codebook, made.tables, build, manifest, audited_links_sha256)
 
     supplement = _fresh_dir(out_dir / f"toronto-election-records-{pin.version}-provenance", out_dir)

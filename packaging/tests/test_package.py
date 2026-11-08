@@ -182,6 +182,38 @@ def test_audited_links_must_be_the_links_in_the_build():
     assert check_audited_links(manifest, "b" * 64)
 
 
+def test_posix_cksum_matches_the_cksum_command(tmp_path):
+    import subprocess
+
+    from te_package.checks import posix_cksum
+
+    for size in (0, 1, 1000, 70000):
+        path = tmp_path / f"f{size}"
+        path.write_bytes(bytes((i * 7 + size) % 256 for i in range(size)))
+        expected = subprocess.run(["cksum", str(path)], capture_output=True, text=True, check=True)
+        crc, length = expected.stdout.split()[:2]
+        assert posix_cksum(path) == (int(crc), int(length))
+
+
+def test_checksums_csv_lists_every_file_with_its_size_sha256_and_cksum(built):
+    from te_package.checks import posix_cksum
+
+    result, _ = built
+    table = pd.read_csv(result.package_dir / "checksums.csv", dtype={"path": str})
+    files = sorted(
+        str(p.relative_to(result.package_dir))
+        for p in result.package_dir.rglob("*")
+        if p.is_file() and p.name != "checksums.csv"
+    )
+    assert table.columns.tolist() == ["path", "bytes", "sha256", "cksum"]
+    assert table.path.tolist() == files
+    for row in table.itertuples():
+        path = result.package_dir / row.path
+        assert row.bytes == path.stat().st_size
+        assert row.sha256 == hashlib.sha256(path.read_bytes()).hexdigest()
+        assert row.cksum == posix_cksum(path)[0]
+
+
 def test_a_release_name_with_a_dot_keeps_both_zip_names(tmp_path):
     from te_package.assemble import _zip
 

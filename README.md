@@ -11,8 +11,9 @@ For a version, two ZIP files:
 
 - `toronto-election-records-<version>.zip`, the user package: eight tables, each as CSV, Parquet,
   Stata and R files; the district shapes as a GeoPackage; the codebook as Markdown and PDF;
-  `datapackage.json`; and the README, changelog, known issues, validation summary, datasheet,
-  citation and licence.
+  `datapackage.json`; `checksums.csv`, the size, SHA-256 and POSIX `cksum` of every file (Stata's
+  `checksum` command computes the same CRC); and the README, changelog, known issues, validation
+  summary, datasheet, citation and licence.
 - `toronto-election-records-<version>-provenance.zip`, the provenance supplement: the full Person
   link table, the columns moved out of the user tables, the build manifest, the verification
   reports, the build's design notes and the build repository at the pinned commit.
@@ -28,6 +29,9 @@ a development package named `dev-<commit>`, which cannot be published.
 | `codebook/codebook.yaml` | Every table and column of the package. The single source for `CODEBOOK.md` and its PDF, the schemas in `datapackage.json`, the Stata variable labels and the R `label` attributes. |
 | `docs/package/` | The templates of the package's documents. Figures in them are filled from the data when the package is made. |
 | `packaging/` | The Python project that makes and checks the package (`te-package`). |
+| `python/` | The Python loader, `toronto-elections` on PyPI, imported as `torontoelections`. |
+| `versions.csv` | The registry of published versions that the loaders read: version, date, DOI, build commit, package schema, and the package ZIP's URL, size, SHA-256 and POSIX `cksum`. The publish step adds a row. |
+| `fixtures/` | One package built from the sample build, with a registry that lists it. The loaders' tests read it with no network; `packaging/tests/fixtures/make_loader_fixture.py` rebuilds it. |
 
 ## Making a package
 
