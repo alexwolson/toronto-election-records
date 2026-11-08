@@ -214,6 +214,41 @@ def test_checksums_csv_lists_every_file_with_its_size_sha256_and_cksum(built):
         assert row.cksum == posix_cksum(path)[0]
 
 
+def test_stata_files_read_back_with_readstat(built):
+    """ReadStat, an implementation of the format independent of pandas, reads each .dta file
+    as Stata will: format 118, the codebook's names and labels, false/true value labels on
+    booleans, %td dates, and the Parquet file's values."""
+
+    import pyarrow.parquet as pq
+    import pyreadstat
+
+    result, _ = built
+    for table in CODEBOOK.tables:
+        path = result.package_dir / "data" / f"{table.name}.dta"
+        assert path.read_bytes()[:50].startswith(b"<stata_dta><header><release>118</release>")
+        frame, meta = pyreadstat.read_dta(str(path), apply_value_formats=False)
+        assert meta.column_names == [c.name for c in table.columns], table.name
+        assert meta.column_labels == [c.label for c in table.columns], table.name
+        reference = pq.read_table(result.package_dir / "data" / f"{table.name}.parquet").to_pydict()
+        for column in table.columns:
+            name = column.name
+            got = frame[name].tolist()
+            if column.type == "boolean":
+                label_set = meta.variable_to_label[name]
+                assert meta.value_labels[label_set] == {0: "false", 1: "true"}, name
+                got = [None if pd.isna(v) else bool(v) for v in got]
+            elif column.type == "date":
+                assert meta.original_variable_types[name] == "%td", name
+                got = [None if pd.isna(v) else pd.Timestamp(v).date() for v in got]
+            elif column.type == "string":
+                got = [None if v == "" else v for v in got]
+            elif column.type == "integer":
+                got = [None if pd.isna(v) else int(v) for v in got]
+            else:
+                got = [None if pd.isna(v) else float(v) for v in got]
+            assert got == reference[name], (table.name, name)
+
+
 def test_a_release_name_with_a_dot_keeps_both_zip_names(tmp_path):
     from te_package.assemble import _zip
 
