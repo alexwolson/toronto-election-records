@@ -161,6 +161,7 @@ def build_package(
     cache: Path,
     out_dir: Path,
     audited_links_sha256: str | None = None,
+    doi: str | None = None,
 ) -> Built:
     if pin.is_release and not audited_links_sha256:
         raise AssemblyError("a release needs the SHA-256 of the links file the audit covered")
@@ -169,7 +170,7 @@ def build_package(
     codebook = load_codebook()
     build = read_build(fetched.root / "data" / "out")
     made = make_tables(build, codebook)
-    values = template_values(made, manifest, pin, codebook, fetched.root, audited_links_sha256)
+    values = template_values(made, manifest, pin, codebook, fetched.root, audited_links_sha256, doi)
     stamp = dt.datetime.fromisoformat(str(manifest["generated_at"]).replace("Z", "+00:00"))
 
     out_dir.mkdir(parents=True, exist_ok=True)
