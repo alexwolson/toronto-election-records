@@ -1,0 +1,40 @@
+name: r-loader
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      TORONTO_ELECTIONS_FIXTURES: ${{ github.workspace }}/fixtures
+    steps:
+      - uses: actions/checkout@v7
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: r
+          extra-packages: any::testthat, any::withr, any::sf, any::pkgload
+      - name: Test against the fixture package
+        working-directory: r
+        run: Rscript -e 'testthat::test_local(stop_on_failure = TRUE)'
+
+  cross-language:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: r
+          extra-packages: any::pkgload
+      - uses: astral-sh/setup-uv@v10.3.3
+      - name: R and Python return the same tables
+        working-directory: python
+        run: uv run pytest tests/test_cross_language.py -rs
