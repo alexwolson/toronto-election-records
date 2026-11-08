@@ -1,0 +1,832 @@
+# Codebook for the Toronto Election Results user package.
+#
+# This file is the single source for CODEBOOK.md and its PDF, the table schemas in
+# datapackage.json, the Stata variable labels and the R `label` attributes. Every column of every
+# table in the package is listed here, in the order it appears in the table.
+#
+# Column fields:
+#   name         column name (at most 32 characters, for Stata)
+#   type         string | integer | number | boolean | date
+#   label        short label (at most 80 characters, for Stata)
+#   description  what the value is
+#   null_when    "never", or when and why the value is null
+#   values       allowed values, for columns that take only a few (optional)
+#   units        units of a count or share (optional)
+
+schema_version: "1.0.0"
+
+tables:
+  - name: elections
+    title: Election events
+    grain: One row per Election event.
+    description: >-
+      An Election event is one general election or one by-election, called by one authority.
+      By-elections called separately are separate events even when they share a polling day.
+    primary_key: event_id
+    columns:
+      - name: event_id
+        type: string
+        label: Election event ID
+        description: Stable ID of the Election event.
+        null_when: never
+      - name: election_date
+        type: date
+        label: Polling day
+        description: The day of the vote.
+        null_when: never
+      - name: election_year
+        type: integer
+        label: Year of polling day
+        description: The year of `election_date`.
+        null_when: never
+      - name: election_type
+        type: string
+        label: General election or by-election
+        description: Whether the event is a general election or a by-election.
+        values: [general, by_election]
+        null_when: never
+      - name: election_authority
+        type: string
+        label: Authority that ran the election
+        description: >-
+          The authority that ran the election. The clerks of the six former municipalities ran
+          the 1994 municipal and school board elections and North York's 1995 by-election; the
+          City Clerk has run every municipal election since 1997.
+        values:
+          - toronto_city_clerk
+          - elections_canada
+          - elections_ontario
+          - former_toronto_city_clerk
+          - east_york_borough_clerk
+          - etobicoke_city_clerk
+          - north_york_city_clerk
+          - scarborough_city_clerk
+          - york_city_clerk
+        null_when: never
+
+  - name: contests
+    title: Contests
+    grain: One row per Contest.
+    description: >-
+      A Contest is one race for one or more seats in one district at one Election event. Void
+      Contests are included and have no Candidacies.
+    primary_key: contest_id
+    foreign_keys:
+      - {field: event_id, table: elections}
+      - {field: district_id, table: districts}
+    columns:
+      - name: contest_id
+        type: string
+        label: Contest ID
+        description: Stable ID of the Contest.
+        null_when: never
+      - name: event_id
+        type: string
+        label: Election event ID
+        description: The Election event the Contest belongs to.
+        null_when: never
+      - name: represented_body
+        type: string
+        label: Body whose seats the Contest fills
+        description: >-
+          The body whose seats the Contest fills, such as `toronto_city_council`,
+          `toronto_district_school_board` or `canada_house_of_commons`. The 1994 bodies are those
+          of the former municipalities and Metropolitan Toronto.
+        null_when: never
+      - name: office_type
+        type: string
+        label: Office contested
+        description: The office contested.
+        values: [mayor, councillor, trustee, mp, mpp]
+        null_when: never
+      - name: district_id
+        type: string
+        label: District ID
+        description: >-
+          The district the Contest was run in, as it was drawn at the time. A citywide race, such
+          as Mayor, has a district for the whole City.
+        null_when: never
+      - name: official_district_id
+        type: string
+        label: Authority's district number or code
+        description: The authority's own number or code for the district.
+        null_when: never
+      - name: district_name
+        type: string
+        label: District name
+        description: >-
+          The district's name as the authority gave it. A district keeps one name within its
+          boundary set, so a riding renamed between two elections under the same boundaries keeps
+          its first name.
+        null_when: never
+      - name: boundary_regime
+        type: string
+        label: Boundary set
+        description: >-
+          The set of district boundaries the Contest was run under, such as
+          `toronto_council_25_wards` or `federal-2013-representation-order`. Districts in
+          different boundary sets cover different areas and cannot be compared directly, even
+          when they share a name or number.
+        null_when: never
+      - name: outcome_method
+        type: string
+        label: How the Contest was decided
+        description: >-
+          How the Contest was decided: by vote, by Acclamation (no more candidates than seats), or
+          `void` when the election was declared void and no result stands.
+        values: [vote, acclamation, void]
+        null_when: never
+      - name: coverage_status
+        type: string
+        label: Whether the sources give the full result
+        description: >-
+          `complete` when the sources give every candidate's votes and the winners. `partial`
+          when they do not, in which case some `votes`, totals or `elected` values are null. See
+          KNOWN_ISSUES.md for the partial Contests.
+        values: [complete, partial]
+        null_when: never
+      - name: acclaimed
+        type: boolean
+        label: Decided by Acclamation
+        description: True when the Contest was decided by Acclamation.
+        null_when: never
+      - name: n_candidates
+        type: integer
+        label: Number of candidates
+        description: The number of Candidacies in the Contest.
+        null_when: Null for void Contests, which have no Candidacies.
+      - name: seats_available
+        type: integer
+        label: Seats filled
+        description: >-
+          The number of members the Contest elects. Every Contest from 2003 on elects one. Every
+          1997 council ward elected two, as did East York's 1994 council and school wards, five
+          1994 Toronto Board of Education wards and several 1994 French-language areas.
+        null_when: never
+      - name: total_contest_votes
+        type: integer
+        label: Valid votes cast for all candidates
+        description: >-
+          The sum of valid votes for every candidate in the Contest. It is the denominator of
+          `vote_share`.
+        units: votes
+        null_when: >-
+          Null for Acclamations and void Contests, where no votes were counted, and for partial
+          Contests whose sources omit some votes.
+      - name: eligible_electors
+        type: integer
+        label: Eligible electors
+        description: The number of electors the authority reports, at the scope in `turnout_scope`.
+        units: electors
+        null_when: >-
+          Null when the authority's source gives no count. That is the case for every trustee
+          Contest, every municipal Contest from 1994 to 2001, the 2026 municipal election (until
+          the City publishes its voter statistics) and the 2026 Scarborough Southwest provincial
+          by-election.
+      - name: ballots_cast
+        type: integer
+        label: Ballots cast
+        description: >-
+          The number of electors who voted, at the same scope as `eligible_electors`.
+        units: ballots
+        null_when: Null under the same conditions as `eligible_electors`.
+      - name: turnout
+        type: number
+        label: Turnout (ballots cast / eligible electors)
+        description: "`ballots_cast` divided by `eligible_electors`."
+        units: share between 0 and 1
+        null_when: Null when either count is null.
+      - name: turnout_scope
+        type: string
+        label: What the turnout counts cover
+        description: >-
+          What the two turnout counts cover. `composite_municipal_ballot` is the City's count of
+          electors who cast a municipal ballot in the ward, which is shared by the Mayor and
+          Councillor races; it is not a count for any one race. Federal and Ontario counts are for
+          the riding.
+        values: [composite_municipal_ballot, federal_electoral_district, provincial_electoral_district]
+        null_when: Null when the turnout counts are null.
+      - name: source_authority
+        type: string
+        label: Organization whose record the Contest comes from
+        description: >-
+          The organization whose record the Contest comes from: the election authority, or the
+          Toronto Star where only the newspaper's printed results survive (most 1994 and 1997
+          trustee Contests and eight 1994 council Contests).
+        values: [Toronto City Clerk, Elections Canada, Elections Ontario, Toronto Star]
+        null_when: never
+      - name: source_url
+        type: string
+        label: URL of the source record
+        description: >-
+          The published URL of each record the Contest comes from, separated by `;`. Where the
+          record is a file inside an archive or one part of a page, the provenance supplement's
+          `source_detail` names the file or part.
+        null_when: never
+
+  - name: candidacies
+    title: Candidacies
+    grain: One row per Candidacy.
+    description: >-
+      A Candidacy is one person's appearance on the ballot in one Contest. Labels from the
+      Contest and the Election event are repeated on each row so the table can be used on its
+      own. `person_id` joins the runs of one person across Contests, offices and years.
+    primary_key: candidacy_id
+    foreign_keys:
+      - {field: event_id, table: elections}
+      - {field: contest_id, table: contests}
+      - {field: district_id, table: districts}
+      - {field: incumbent_held_district_id, table: districts}
+      - {field: party_id, table: parties}
+      - {field: person_id, table: people}
+    columns:
+      - name: candidacy_id
+        type: string
+        label: Candidacy ID
+        description: Stable ID of the Candidacy.
+        null_when: never
+      - name: person_id
+        type: string
+        label: Person ID
+        description: >-
+          The Person who ran. A link is made only from evidence; similar names alone never make
+          one. `person_link_basis` says what the link rests on.
+        null_when: >-
+          Null when the evidence does not establish who ran, or the only proposed Person was
+          rejected.
+      - name: person_link_basis
+        type: string
+        label: What the link to the Person rests on
+        description: >-
+          What the link from this Candidacy to its Person rests on. `own_record`: the Person was
+          made from this Candidacy, so the link joins it to no earlier or later run.
+          `official_record`: an official record ties the runs, such as incumbency the authority
+          reported or a Council roster. `person_specific_source`: a source about the person ties
+          the runs, such as a biography, a news report or a candidate profile. `structural`: no
+          source about the person was found, and the runs are joined under the build's
+          structural rules. To keep only links that a source confirms, treat Candidacies with
+          `structural` as having no Person.
+        values: [own_record, official_record, person_specific_source, structural]
+        null_when: Null when `person_id` is null.
+      - name: event_id
+        type: string
+        label: Election event ID
+        description: The Election event.
+        null_when: never
+      - name: contest_id
+        type: string
+        label: Contest ID
+        description: The Contest.
+        null_when: never
+      - name: election_date
+        type: date
+        label: Polling day
+        description: Polling day, repeated from `elections`.
+        null_when: never
+      - name: election_year
+        type: integer
+        label: Year of polling day
+        description: The year of polling day, repeated from `elections`.
+        null_when: never
+      - name: election_type
+        type: string
+        label: General election or by-election
+        description: Repeated from `elections`.
+        values: [general, by_election]
+        null_when: never
+      - name: election_authority
+        type: string
+        label: Authority that ran the election
+        description: Repeated from `elections`.
+        values:
+          - toronto_city_clerk
+          - elections_canada
+          - elections_ontario
+          - former_toronto_city_clerk
+          - east_york_borough_clerk
+          - etobicoke_city_clerk
+          - north_york_city_clerk
+          - scarborough_city_clerk
+          - york_city_clerk
+        null_when: never
+      - name: represented_body
+        type: string
+        label: Body whose seats the Contest fills
+        description: Repeated from `contests`.
+        null_when: never
+      - name: office_type
+        type: string
+        label: Office contested
+        description: Repeated from `contests`.
+        values: [mayor, councillor, trustee, mp, mpp]
+        null_when: never
+      - name: district_id
+        type: string
+        label: District ID
+        description: Repeated from `contests`.
+        null_when: never
+      - name: official_district_id
+        type: string
+        label: Authority's district number or code
+        description: Repeated from `contests`.
+        null_when: never
+      - name: district_name
+        type: string
+        label: District name
+        description: Repeated from `contests`.
+        null_when: never
+      - name: boundary_regime
+        type: string
+        label: Boundary set
+        description: Repeated from `contests`.
+        null_when: never
+      - name: candidate_name
+        type: string
+        label: Candidate name, given name first
+        description: >-
+          The candidate's name, given name first. The City's poll-by-poll files print names
+          surname first; where the split is unclear, the Clerk's declaration of results sets the
+          order.
+        null_when: never
+      - name: candidate_name_raw
+        type: string
+        label: Candidate name as the source printed it
+        description: The candidate's name exactly as the source printed it.
+        null_when: never
+      - name: party_id
+        type: string
+        label: Party ID
+        description: >-
+          The Party the candidate ran for. Parties are recorded only in federal and Ontario
+          races; municipal races are non-partisan.
+        null_when: Null when `affiliation_status` is not `party`.
+      - name: party_name
+        type: string
+        label: Party name
+        description: The Party's name, repeated from `parties.canonical_name`.
+        null_when: Null when `party_id` is null.
+      - name: affiliation_status
+        type: string
+        label: Party, independent, non-partisan or not reported
+        description: >-
+          `party` when the candidate ran for a Party, `independent` when they ran as an
+          independent in a federal or Ontario race, `non_partisan` in every municipal and trustee
+          race, and `not_reported` when the source gives no affiliation.
+        values: [party, independent, non_partisan, not_reported]
+        null_when: never
+      - name: votes
+        type: integer
+        label: Valid votes for the candidate
+        description: >-
+          Valid votes for the candidate, as certified. Zero means the candidate received no
+          votes.
+        units: votes
+        null_when: >-
+          Null for Acclamations, where no vote was held, and for the few candidates in partial
+          Contests whose votes the sources do not give.
+      - name: total_contest_votes
+        type: integer
+        label: Valid votes cast for all candidates
+        description: >-
+          The sum of valid votes for every candidate in the Contest, repeated from `contests`.
+          It is the denominator of `vote_share`.
+        units: votes
+        null_when: Null for Acclamations and for partial Contests whose sources omit some votes.
+      - name: vote_share
+        type: number
+        label: Share of valid votes (votes / total_contest_votes)
+        description: >-
+          `votes` divided by `total_contest_votes`. In a Contest with more than one seat each
+          voter could cast several votes, so this is a share of votes, not of voters.
+        units: share between 0 and 1
+        null_when: Null when `votes` or `total_contest_votes` is null.
+      - name: vote_rank
+        type: integer
+        label: Rank by votes within the Contest
+        description: >-
+          The candidate's rank by votes within the Contest, 1 for the most. Tied totals share a
+          rank.
+        null_when: Null when `total_contest_votes` is null.
+      - name: n_candidates
+        type: integer
+        label: Number of candidates
+        description: The number of Candidacies in the Contest.
+        null_when: never
+      - name: seats_available
+        type: integer
+        label: Seats filled
+        description: The number of members the Contest elects, repeated from `contests`.
+        null_when: never
+      - name: elected
+        type: boolean
+        label: Elected
+        description: >-
+          True when the candidate was elected, as the authority certified. Where a source lists
+          votes without marking winners, the top `seats_available` candidates are elected.
+        null_when: >-
+          Null when the sources cannot establish the result: candidates tied across the last
+          seat, or a partial Contest whose winner is unknown.
+      - name: acclaimed
+        type: boolean
+        label: Elected by Acclamation
+        description: True when the candidate was elected by Acclamation.
+        null_when: never
+      - name: outcome_method
+        type: string
+        label: How the Contest was decided
+        description: Repeated from `contests`.
+        values: [vote, acclamation, void]
+        null_when: never
+      - name: coverage_status
+        type: string
+        label: Whether the sources give the full result
+        description: Repeated from `contests`.
+        values: [complete, partial]
+        null_when: never
+      - name: eligible_electors
+        type: integer
+        label: Eligible electors
+        description: Repeated from `contests`.
+        units: electors
+        null_when: Null under the conditions given for `contests.eligible_electors`.
+      - name: ballots_cast
+        type: integer
+        label: Ballots cast
+        description: Repeated from `contests`.
+        units: ballots
+        null_when: Null under the conditions given for `contests.eligible_electors`.
+      - name: turnout
+        type: number
+        label: Turnout (ballots cast / eligible electors)
+        description: Repeated from `contests`.
+        units: share between 0 and 1
+        null_when: Null when either count is null.
+      - name: turnout_scope
+        type: string
+        label: What the turnout counts cover
+        description: Repeated from `contests`.
+        values: [composite_municipal_ballot, federal_electoral_district, provincial_electoral_district]
+        null_when: Null when the turnout counts are null.
+      - name: incumbent
+        type: boolean
+        label: Held this office in this body before the election
+        description: >-
+          True when the Person held the same office in the same body on the eve of the election,
+          from the body's roster. False when the Person is linked and the roster shows they did
+          not. It is never inferred from a repeated name or an earlier win alone.
+        null_when: >-
+          Null when no Person is linked, or when the release holds no roster that can settle it:
+          Mayor and Council in 1994 and 1997 (see `predecessor_incumbent` for 1997), and every
+          trustee race before 2026.
+      - name: incumbent_appointed
+        type: boolean
+        label: Incumbent's seat came by appointment
+        description: >-
+          True when the incumbent's seat came by appointment to fill a vacancy, false when it
+          came by election.
+        null_when: >-
+          Null when the candidate is not an incumbent, or the tenure does not say, as for the
+          sitting members at the 1995 Ontario election.
+      - name: incumbent_held_district_id
+        type: string
+        label: District of the seat the incumbent held
+        description: >-
+          The `district_id` of the seat the incumbent held. It can belong to an earlier boundary
+          set than the Candidacy's district.
+        null_when: >-
+          Null when the candidate is not an incumbent, the tenure gives no district, or the seat
+          is outside the release.
+      - name: incumbent_changed_district
+        type: boolean
+        label: Incumbent ran for a seat other than the one held
+        description: >-
+          True when the incumbent ran for a seat other than the one held. Within one boundary
+          set that means another district. Across a boundary change it is false only when the
+          district contested holds more of the held district's people than any other district
+          does: council wards count people by the City's polls, and ridings by census
+          population. A Mayor never changes district. A seat in a legislature outside the City
+          counts as a change.
+        null_when: >-
+          Null when the candidate is not an incumbent, or the boundaries cannot be compared: the
+          1997 federal, 1999 Ontario, 2004 federal and 2007 Ontario elections.
+      - name: predecessor_incumbent
+        type: boolean
+        label: Sat on a predecessor council before amalgamation
+        description: >-
+          For the first election of the amalgamated City on 10 November 1997: true when the
+          Person sat on Metro Council or one of the six former councils on the eve of the
+          election.
+        null_when: >-
+          Null outside the Mayor and Councillor races of 1997, and for those races when no Person
+          is linked. The release holds no rosters of the former school boards.
+      - name: campaign_url
+        type: string
+        label: Campaign website
+        description: The campaign website listed in the City's 2026 candidate list.
+        null_when: Null when no website was listed, and for every election before 2026.
+      - name: source_authority
+        type: string
+        label: Organization whose record the row comes from
+        description: >-
+          The organization whose record the row comes from: the election authority, or the
+          Toronto Star where only the newspaper's printed results survive.
+        values: [Toronto City Clerk, Elections Canada, Elections Ontario, Toronto Star]
+        null_when: never
+      - name: source_url
+        type: string
+        label: URL of the source record
+        description: >-
+          The published URL of each record the row comes from, separated by `;`. Where the record
+          is a file inside an archive or one part of a page, the provenance supplement's
+          `source_detail` names the file or part.
+        null_when: never
+
+  - name: people
+    title: People
+    grain: One row per active Person.
+    description: >-
+      A Person is one human being who ran for office or held an office in the release. Each
+      Person keeps the same `person_id` from version to version. When two Persons turn out to be
+      the same person, one ID is retired and listed in `person_id_redirects`.
+    primary_key: person_id
+    columns:
+      - name: person_id
+        type: string
+        label: Person ID
+        description: Stable ID of the Person.
+        null_when: never
+      - name: preferred_name
+        type: string
+        label: Name used for the Person
+        description: >-
+          The name the release uses for the Person, given name first. The names in
+          `candidacies` are kept as each ballot printed them and are never changed to match it.
+        null_when: never
+      - name: house_of_commons_id
+        type: string
+        label: House of Commons person ID
+        description: >-
+          The House of Commons' person ID, from the member records of the 36th Parliament on.
+        null_when: Null for People who did not sit in the House from the 36th Parliament on.
+      - name: ontario_legislature_id
+        type: string
+        label: Legislative Assembly of Ontario member ID
+        description: The Legislative Assembly of Ontario's member ID, the slug of its member profile.
+        null_when: >-
+          Null for People who did not sit in the Assembly from the 36th Parliament on, including
+          those known only from Elections Ontario's 1995 incumbent flag.
+      - name: wikidata_id
+        type: string
+        label: Wikidata item
+        description: >-
+          The Wikidata item for the Person, matched through their House of Commons seat or their
+          Ontario member ID. Only members of the House or the Assembly are matched.
+        null_when: Null when the Person sat in neither, or has no Wikidata item.
+      - name: parlinfo_id
+        type: string
+        label: ParlInfo person ID
+        description: >-
+          The Library of Parliament's ParlInfo person ID, as recorded on the matched Wikidata
+          item.
+        null_when: Null when the Person has no House match or the Wikidata item records no ID.
+
+  - name: person_id_redirects
+    title: Retired Person IDs
+    grain: One row per retired Person ID.
+    description: >-
+      Person IDs that a merge retired, each with the active Person that replaced it. Use this
+      table to bring IDs saved from an earlier version up to date.
+    primary_key: retired_person_id
+    foreign_keys:
+      - {field: person_id, table: people}
+    columns:
+      - name: retired_person_id
+        type: string
+        label: Retired Person ID
+        description: The Person ID that was retired.
+        null_when: never
+      - name: person_id
+        type: string
+        label: Person ID that replaced it
+        description: The active Person ID that replaced it.
+        null_when: never
+
+  - name: office_tenures
+    title: Office tenures
+    grain: One row per piece of evidence that a Person held an office.
+    description: >-
+      Evidence that a Person held one office in one body, with dates. Each row is one piece of
+      evidence, not one term of office: a councillor has a row for each general election they
+      sat through, and a member of a legislature a row for each Parliament. The release uses
+      these rows to set incumbency. Appointments to fill a vacancy are included.
+    primary_key: office_tenure_id
+    foreign_keys:
+      - {field: person_id, table: people}
+      - {field: district_id, table: districts}
+    columns:
+      - name: office_tenure_id
+        type: string
+        label: Office tenure ID
+        description: Stable ID of the tenure row.
+        null_when: never
+      - name: person_id
+        type: string
+        label: Person ID
+        description: The Person who held the office.
+        null_when: never
+      - name: represented_body
+        type: string
+        label: Body
+        description: The body in which the office was held.
+        null_when: never
+      - name: office_type
+        type: string
+        label: Office held
+        description: The office held.
+        values: [mayor, councillor, trustee, mp, mpp]
+        null_when: never
+      - name: district_id
+        type: string
+        label: District of the seat
+        description: The district of the seat held.
+        null_when: Null when the source gives no district within the release.
+      - name: started_on
+        type: date
+        label: Start of the tenure
+        description: The first day of the tenure, bounded as `started_on_precision` says.
+        null_when: Null when the start is unknown.
+      - name: started_on_precision
+        type: string
+        label: How the start date is bounded
+        description: >-
+          `election_date`: the day of the election the Person won. `appointment_date`: the day
+          Council appointed them. `on_or_before`: they were in office by that day. `unknown`: the
+          source gives no start.
+        values: [election_date, appointment_date, on_or_before, unknown]
+        null_when: never
+      - name: ended_on
+        type: date
+        label: End of the tenure
+        description: The last day of the tenure, bounded as `ended_on_precision` says.
+        null_when: Null when the tenure is ongoing.
+      - name: ended_on_precision
+        type: string
+        label: How the end date is bounded
+        description: >-
+          `exact`: the last day of the term as the House or the Assembly records it.
+          `at_or_after_reference`: the Person was still in office on the eve of the next general
+          election, the date given. `before_or_at_reference`: the Person had left by that date.
+          `ongoing`: the Person is still in office.
+        values: [exact, at_or_after_reference, before_or_at_reference, ongoing]
+        null_when: never
+      - name: entry_method
+        type: string
+        label: How the Person came to office
+        description: Whether the Person came to the office by election or by appointment.
+        values: [election, appointment, unknown]
+        null_when: never
+      - name: source_authority
+        type: string
+        label: Organization whose record the row comes from
+        description: The organization whose record supports the row.
+        null_when: never
+      - name: source_url
+        type: string
+        label: URL of the source record
+        description: >-
+          The published URL of each record that supports the row, separated by `;`. The full
+          evidence is in the provenance supplement.
+        null_when: Null when the evidence cites no published URL.
+      - name: spell_id
+        type: string
+        label: Unbroken stretch of service
+        description: >-
+          Groups the rows of one unbroken stretch of service by one Person in one office and
+          body.
+        null_when: Null when the start of the tenure is unknown.
+
+  - name: parties
+    title: Parties
+    grain: One row per Party.
+    description: >-
+      A Party is one registered party within one jurisdiction. A Party is a relationship of a
+      Candidacy, never a permanent attribute of a Person.
+    primary_key: party_id
+    columns:
+      - name: party_id
+        type: string
+        label: Party ID
+        description: Stable ID of the Party.
+        null_when: never
+      - name: jurisdiction
+        type: string
+        label: Authority the Party is registered with
+        description: The election authority with which the Party is registered.
+        values: [elections_canada, elections_ontario]
+        null_when: never
+      - name: canonical_name
+        type: string
+        label: Party name
+        description: The name the release uses for the Party.
+        null_when: never
+      - name: party_name_raw
+        type: string
+        label: Party name as the source printed it
+        description: The Party's name exactly as the source printed it.
+        null_when: never
+
+  - name: districts
+    title: Districts
+    grain: One row per district.
+    description: >-
+      A district is one ward, riding or trustee area as drawn in one boundary set. The shapes
+      are in `districts.gpkg`, which holds the same columns and a geometry for every district
+      with a shape.
+    primary_key: district_id
+    columns:
+      - name: district_id
+        type: string
+        label: District ID
+        description: Stable ID of the district.
+        null_when: never
+      - name: represented_body
+        type: string
+        label: Body
+        description: The body whose seats the district elects.
+        null_when: never
+      - name: boundary_regime
+        type: string
+        label: Boundary set
+        description: The set of boundaries the district belongs to.
+        null_when: never
+      - name: official_district_id
+        type: string
+        label: Authority's district number or code
+        description: The authority's own number or code for the district.
+        null_when: never
+      - name: district_name
+        type: string
+        label: District name
+        description: The district's name as the authority gave it.
+        null_when: never
+      - name: geographic_name
+        type: string
+        label: Place name of the district
+        description: >-
+          A place name for a numbered ward. For council wards it is the ward's official name. For
+          trustee wards it is either the official name or the names of the council wards the
+          trustee ward joins, separated by `;`, as `name_provenance` says.
+        null_when: Null for districts whose `district_name` is already a place name, and for wards with no name on record.
+      - name: district_display_name
+        type: string
+        label: Name for display
+        description: "`district_name` and `geographic_name` joined, for display."
+        null_when: Null when `geographic_name` is null.
+      - name: name_provenance
+        type: string
+        label: Where the place name comes from
+        description: >-
+          `official`: `geographic_name` is the authority's name for the ward.
+          `derived_from_city_wards`: it lists the council wards that make up the trustee ward.
+        values: [official, derived_from_city_wards]
+        null_when: Null when `geographic_name` is null.
+      - name: geometry_status
+        type: string
+        label: Whether the release has a shape
+        description: "`available` when `districts.gpkg` holds the district's shape."
+        values: [available, not_acquired]
+        null_when: never
+      - name: geometry_missing_reason
+        type: string
+        label: Why there is no shape
+        description: Why the release has no shape for the district.
+        values:
+          - council_boundary_regime_not_supported
+          - district_geometry_not_acquired_for_represented_body
+          - federal_district_geometry_not_acquired
+          - provincial_district_geometry_not_acquired
+          - school_board_district_geometry_not_acquired
+        null_when: Null when a shape is available.
+      - name: geometry_source_authority
+        type: string
+        label: Publisher of the shape
+        description: The organization that published the shape.
+        null_when: Null when no shape is available.
+      - name: geometry_source_resource
+        type: string
+        label: Title of the source boundary file
+        description: >-
+          The title of the boundary file the shape comes from. Trustee ward shapes are unions of
+          council ward shapes, and Ontario's 1999 and 2007 ridings use the federal ridings that the
+          Representation Acts of 1996 and 2005 adopted.
+        null_when: Null when no shape is available.
+      - name: geometry_source_year
+        type: integer
+        label: Year of the source boundary file
+        description: The year of the boundary file the shape comes from.
+        null_when: Null when no shape is available.
+      - name: geometry_source_url
+        type: string
+        label: URL of the source boundary file
+        description: The published URL of the boundary file, or of the page it was saved from.
+        null_when: Null when no shape is available.

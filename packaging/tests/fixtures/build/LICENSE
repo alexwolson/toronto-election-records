@@ -1,0 +1,41 @@
+This repository is licensed in two parts.
+
+- The source code (src/, scripts/ and tests/) is licensed under the MIT License, below.
+- The data and documentation (data/, docs/, README.md and CONTEXT.md) are licensed under the
+  Creative Commons Attribution 4.0 International License (CC BY 4.0):
+  https://creativecommons.org/licenses/by/4.0/legalcode
+
+The release is built from public records published by the City of Toronto, Elections Canada,
+Elections Ontario and other sources listed in README.md and docs/. Those records remain subject to
+their publishers' terms. Contains information licensed under the Open Government Licence – Toronto
+and the Open Government Licence – Canada.
+The 1996-order federal riding shapes are adapted from Statistics Canada, Federal Electoral
+Districts (1996 Representation Order) Cartographic Boundary File, 2001 Census, under the
+Statistics Canada Open Licence. This does not constitute an endorsement by Statistics Canada of
+this product.
+Short quotations from newspapers and other publications in docs/research/ remain the property of
+their publishers.
+
+-------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2026 Alex Olson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
